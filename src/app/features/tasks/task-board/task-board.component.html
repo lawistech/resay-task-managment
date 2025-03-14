@@ -1,0 +1,185 @@
+<!-- src/app/features/tasks/task-board/task-board.component.html -->
+<div class="task-board-container">
+    <div class="board-header">
+      <div class="header-left">
+        <h1 class="page-title">Task Board</h1>
+        <p class="page-subtitle">Manage and organize your tasks visually</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" (click)="createTask()">
+          <i class="fas fa-plus"></i>
+          New Task
+        </button>
+      </div>
+    </div>
+    
+    <div class="board-filters">
+      <div class="filter-group">
+        <label for="projectFilter">Project</label>
+        <select id="projectFilter" [formControl]="projectFilter" class="filter-select">
+          <option value="all">All Projects</option>
+          <option *ngFor="let project of projects" [value]="project.id">{{ project.name }}</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="assigneeFilter">Assignee</label>
+        <select id="assigneeFilter" [formControl]="assigneeFilter" class="filter-select">
+          <option value="all">All Assignees</option>
+          <option *ngFor="let user of users" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+          <option value="null">Unassigned</option>
+        </select>
+      </div>
+      
+      <div class="filter-group search-group">
+        <label for="searchFilter">Search</label>
+        <div class="search-input-container">
+          <i class="fas fa-search search-icon"></i>
+          <input 
+            type="text" 
+            id="searchFilter" 
+            [formControl]="searchQuery" 
+            placeholder="Search tasks..." 
+            class="search-input"
+          >
+          <button *ngIf="searchQuery.value" class="clear-search" (click)="searchQuery.setValue('')">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      
+      <button class="btn-clear-filters" (click)="clearFilters()">
+        Clear Filters
+      </button>
+    </div>
+    
+    <app-loading-spinner *ngIf="loading" text="Loading tasks..."></app-loading-spinner>
+    
+    <div *ngIf="!loading" class="task-board">
+      <div class="board-columns">
+        <!-- To Do Column -->
+        <div class="board-column">
+          <div class="column-header">
+            <h3>To Do</h3>
+            <span class="task-count">{{ todoTasks.length }}</span>
+          </div>
+          <div 
+            class="task-list"
+            id="todoList"
+            cdkDropList
+            [cdkDropListData]="todoTasks"
+            [cdkDropListConnectedTo]="['inProgressList', 'reviewList', 'doneList']"
+            (cdkDropListDropped)="onDrop($event)"
+          >
+            <app-task-card 
+              *ngFor="let task of todoTasks" 
+              [task]="task"
+              cdkDrag
+              (click)="viewTask(task.id)"
+              class="task-card-container"
+            >
+              <div class="drag-placeholder" *cdkDragPlaceholder></div>
+            </app-task-card>
+            
+            <div *ngIf="todoTasks.length === 0" class="empty-list">
+              <i class="fas fa-clipboard-list"></i>
+              <p>No tasks to do</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- In Progress Column -->
+        <div class="board-column">
+          <div class="column-header">
+            <h3>In Progress</h3>
+            <span class="task-count">{{ inProgressTasks.length }}</span>
+          </div>
+          <div 
+            class="task-list"
+            id="inProgressList"
+            cdkDropList
+            [cdkDropListData]="inProgressTasks"
+            [cdkDropListConnectedTo]="['todoList', 'reviewList', 'doneList']"
+            (cdkDropListDropped)="onDrop($event)"
+          >
+            <app-task-card 
+              *ngFor="let task of inProgressTasks" 
+              [task]="task"
+              cdkDrag
+              (click)="viewTask(task.id)"
+              class="task-card-container"
+            >
+              <div class="drag-placeholder" *cdkDragPlaceholder></div>
+            </app-task-card>
+            
+            <div *ngIf="inProgressTasks.length === 0" class="empty-list">
+              <i class="fas fa-spinner"></i>
+              <p>No tasks in progress</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- In Review Column -->
+        <div class="board-column">
+          <div class="column-header">
+            <h3>In Review</h3>
+            <span class="task-count">{{ reviewTasks.length }}</span>
+          </div>
+          <div 
+            class="task-list"
+            id="reviewList"
+            cdkDropList
+            [cdkDropListData]="reviewTasks"
+            [cdkDropListConnectedTo]="['todoList', 'inProgressList', 'doneList']"
+            (cdkDropListDropped)="onDrop($event)"
+          >
+            <app-task-card 
+              *ngFor="let task of reviewTasks" 
+              [task]="task"
+              cdkDrag
+              (click)="viewTask(task.id)"
+              class="task-card-container"
+            >
+              <div class="drag-placeholder" *cdkDragPlaceholder></div>
+            </app-task-card>
+            
+            <div *ngIf="reviewTasks.length === 0" class="empty-list">
+              <i class="fas fa-search"></i>
+              <p>No tasks in review</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Done Column -->
+        <div class="board-column">
+          <div class="column-header">
+            <h3>Done</h3>
+            <span class="task-count">{{ doneTasks.length }}</span>
+          </div>
+          <div 
+            class="task-list"
+            id="doneList"
+            cdkDropList
+            [cdkDropListData]="doneTasks"
+            [cdkDropListConnectedTo]="['todoList', 'inProgressList', 'reviewList']"
+            (cdkDropListDropped)="onDrop($event)"
+          >
+            <app-task-card 
+              *ngFor="let task of doneTasks" 
+              [task]="task"
+              cdkDrag
+              (click)="viewTask(task.id)"
+              class="task-card-container"
+            >
+              <div class="drag-placeholder" *cdkDragPlaceholder></div>
+            </app-task-card>
+            
+            <div *ngIf="doneTasks.length === 0" class="empty-list">
+              <i class="fas fa-check-circle"></i>
+              <p>No completed tasks</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

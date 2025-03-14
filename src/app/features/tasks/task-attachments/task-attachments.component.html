@@ -1,0 +1,44 @@
+<!-- src/app/features/tasks/task-attachments/task-attachments.component.html -->
+<div class="attachments-container">
+    <div class="section-header">
+      <h3 class="section-title">Attachments</h3>
+      <app-file-dropzone 
+        [disabled]="isUploading"
+        [allowMultiple]="false"
+        (filesSelected)="handleFileUpload($event)"
+      ></app-file-dropzone>
+    </div>
+    
+    <div class="attachments-list">
+      <div *ngIf="isUploading" class="uploading-indicator">
+        <i class="fas fa-spinner fa-spin"></i>
+        Uploading file...
+      </div>
+      
+      <div *ngIf="attachments.length === 0 && !isUploading" class="empty-state">
+        No attachments for this task
+      </div>
+      
+      <div *ngFor="let attachment of attachments" class="attachment-item">
+        <div class="attachment-icon">
+          <i class="fas" [ngClass]="getIconClass(attachment.mimeType)"></i>
+        </div>
+        
+        <div class="attachment-details">
+          <div class="attachment-name">{{ attachment.originalName }}</div>
+          <div class="attachment-meta">
+            {{ attachment.size | fileSize }} • Uploaded {{ attachment.createdAt | timeAgo }}
+          </div>
+        </div>
+        
+        <div class="attachment-actions">
+          <button class="btn-icon" (click)="downloadAttachment(attachment)" title="Download">
+            <i class="fas fa-download"></i>
+          </button>
+          <button class="btn-icon" (click)="deleteAttachment(attachment)" title="Delete">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
