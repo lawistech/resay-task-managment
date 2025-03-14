@@ -1,0 +1,43 @@
+<header class="header">
+    <div class="header-left">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="search-container">
+        <input type="text" placeholder="Search..." class="search-input" />
+        <i class="fas fa-search search-icon"></i>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <div class="header-icon" (click)="openNotifications()">
+        <i class="fas fa-bell"></i>
+        <span class="notification-badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
+      </div>
+      
+      <div class="user-profile" (click)="toggleUserMenu()" clickOutside (clickOutside)="userMenuOpen = false">
+        <img [src]="user?.avatarUrl || 'assets/images/default-avatar.png'" alt="User avatar" class="avatar" />
+        <div class="user-info">
+          <span class="user-name">{{ user?.firstName }} {{ user?.lastName }}</span>
+          <span class="user-role">{{ user?.role | titlecase }}</span>
+        </div>
+        <i class="fas fa-chevron-down dropdown-icon"></i>
+        
+        <div class="user-dropdown" *ngIf="userMenuOpen">
+          <div class="dropdown-item" routerLink="/settings/profile">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+          </div>
+          <div class="dropdown-item" routerLink="/settings/notifications">
+            <i class="fas fa-bell"></i>
+            <span>Notifications</span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item" (click)="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>

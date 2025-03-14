@@ -1,0 +1,14 @@
+<div class="toast-container" *ngIf="visible">
+    <div class="toast" [ngClass]="toastTypeClass">
+      <div class="toast-icon">
+        <i class="fas" [ngClass]="toastIconClass"></i>
+      </div>
+      <div class="toast-content">
+        <div class="toast-title">{{ title }}</div>
+        <div class="toast-message">{{ message }}</div>
+      </div>
+      <button class="toast-close" (click)="close()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>

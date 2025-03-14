@@ -1,0 +1,79 @@
+<div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <img src="assets/images/logo.svg" alt="Lawis Task Manager" class="logo">
+        <h1 class="title">Welcome Back</h1>
+        <p class="subtitle">Sign in to continue to Lawis Task Manager</p>
+      </div>
+      
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+        <div class="alert alert-danger" *ngIf="errorMessage">
+          <i class="fas fa-exclamation-circle"></i>
+          {{ errorMessage }}
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email</label>
+          <div class="input-with-icon">
+            <i class="fas fa-envelope"></i>
+            <input 
+              type="email" 
+              id="email" 
+              formControlName="email" 
+              placeholder="Enter your email"
+              [class.is-invalid]="submitted && f.email.errors"
+            >
+          </div>
+          <div class="invalid-feedback" *ngIf="submitted && f.email.errors">
+            <span *ngIf="f.email.errors.required">Email is required</span>
+            <span *ngIf="f.email.errors.email">Please enter a valid email address</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <div class="label-with-link">
+            <label for="password">Password</label>
+            <a routerLink="/auth/forgot-password" class="forgot-password">Forgot password?</a>
+          </div>
+          <div class="input-with-icon">
+            <i class="fas fa-lock"></i>
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              id="password" 
+              formControlName="password" 
+              placeholder="Enter your password"
+              [class.is-invalid]="submitted && f.password.errors"
+            >
+            <button 
+              type="button" 
+              class="password-toggle" 
+              (click)="togglePasswordVisibility()"
+            >
+              <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+            </button>
+          </div>
+          <div class="invalid-feedback" *ngIf="submitted && f.password.errors">
+            <span *ngIf="f.password.errors.required">Password is required</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <div class="checkbox">
+            <input type="checkbox" id="rememberMe" formControlName="rememberMe">
+            <label for="rememberMe">Remember me</label>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary btn-block" [disabled]="loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+            Sign In
+          </button>
+        </div>
+        
+        <div class="auth-footer">
+          <p>Don't have an account? <a routerLink="/auth/register">Sign Up</a></p>
+        </div>
+      </form>
+    </div>
+  </div>
