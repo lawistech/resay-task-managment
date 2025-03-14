@@ -1,0 +1,91 @@
+<div class="calendar-container">
+    <div class="calendar-header">
+      <div class="header-left">
+        <h1 class="page-title">Calendar</h1>
+        <p class="page-subtitle">Manage your schedule and events</p>
+      </div>
+      <div class="header-actions">
+        <div class="view-toggle">
+          <button 
+            class="view-btn" 
+            [class.active]="currentView === 'month'" 
+            (click)="changeView('month')">
+            <i class="fas fa-calendar-alt"></i>
+            Month
+          </button>
+          <button 
+            class="view-btn" 
+            [class.active]="currentView === 'week'" 
+            (click)="changeView('week')">
+            <i class="fas fa-calendar-week"></i>
+            Week
+          </button>
+          <button 
+            class="view-btn" 
+            [class.active]="currentView === 'day'" 
+            (click)="changeView('day')">
+            <i class="fas fa-calendar-day"></i>
+            Day
+          </button>
+        </div>
+        <button class="btn-create" (click)="openCreateEventModal()">
+          <i class="fas fa-plus"></i>
+          New Event
+        </button>
+      </div>
+    </div>
+  
+    <div class="calendar-navigation">
+      <button class="nav-btn" (click)="navigatePrevious()">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <h2 class="current-date">{{ viewTitle }}</h2>
+      <button class="nav-btn" (click)="navigateNext()">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      <button class="today-btn" (click)="navigateToday()">Today</button>
+    </div>
+  
+    <div class="calendar-content">
+      <app-loading-spinner *ngIf="loading" text="Loading calendar..."></app-loading-spinner>
+      
+      <!-- Month View -->
+      <app-month-view 
+        *ngIf="currentView === 'month' && !loading" 
+        [currentDate]="currentDate"
+        [events]="events"
+        (dayClick)="handleDayClick($event)"
+        (eventClick)="handleEventClick($event)">
+      </app-month-view>
+      
+      <!-- Week View -->
+      <app-week-view 
+        *ngIf="currentView === 'week' && !loading" 
+        [currentDate]="currentDate"
+        [events]="events"
+        (hourClick)="handleHourClick($event)"
+        (eventClick)="handleEventClick($event)">
+      </app-week-view>
+      
+      <!-- Day View -->
+      <app-day-view 
+        *ngIf="currentView === 'day' && !loading" 
+        [currentDate]="currentDate"
+        [events]="events"
+        (hourClick)="handleHourClick($event)"
+        (eventClick)="handleEventClick($event)">
+      </app-day-view>
+    </div>
+  </div>
+  
+  <!-- Event Form Modal -->
+  <div class="modal-backdrop" *ngIf="showEventModal" (click)="closeEventModal()"></div>
+  <div class="event-modal" *ngIf="showEventModal">
+    <app-calendar-event-form
+      [event]="selectedEvent"
+      [startDate]="selectedDate"
+      (save)="saveEvent($event)"
+      (delete)="deleteEvent($event)"
+      (cancel)="closeEventModal()">
+    </app-calendar-event-form>
+  </div>

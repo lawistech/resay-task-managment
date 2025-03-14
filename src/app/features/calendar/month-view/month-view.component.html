@@ -1,0 +1,42 @@
+<div class="month-calendar">
+    <div class="calendar-header">
+      <div *ngFor="let day of weekdays" class="weekday-header">
+        {{ day.slice(0, 3) }}
+      </div>
+    </div>
+    
+    <div class="calendar-grid">
+      <div *ngFor="let week of weeks" class="calendar-week">
+        <div 
+          *ngFor="let day of week" 
+          class="calendar-day" 
+          [class.current-month]="day.isCurrentMonth"
+          [class.today]="day.isToday"
+          (click)="handleDayClick(day)"
+        >
+          <div class="day-header">
+            <span class="day-number">{{ day.date.getDate() }}</span>
+          </div>
+          
+          <div class="day-events">
+            <div 
+              *ngFor="let event of day.events.slice(0, 3)" 
+              class="event-item"
+              [style.background-color]="getEventBackgroundColor(event.color)"
+              [style.border-left-color]="getEventBorderColor(event.color)"
+              (click)="handleEventClick(event, $event)"
+            >
+              <div class="event-time" *ngIf="!event.allDay">
+                {{ event.startTime | date:'shortTime' }}
+              </div>
+              <div class="event-title">{{ event.title }}</div>
+            </div>
+            
+            <div class="more-events" *ngIf="day.events.length > 3">
+              +{{ day.events.length - 3 }} more
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
