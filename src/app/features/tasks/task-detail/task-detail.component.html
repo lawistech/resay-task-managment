@@ -1,0 +1,268 @@
+<!-- src/app/features/tasks/task-detail/task-detail.component.html -->
+<div class="task-detail-container">
+    <app-loading-spinner *ngIf="loading" text="Loading task details..."></app-loading-spinner>
+    
+    <div *ngIf="!loading && task" class="task-content">
+      <!-- Task Header -->
+      <div class="task-header">
+        <div class="header-left">
+          <div class="back-button" routerLink="/tasks">
+            <i class="fas fa-arrow-left"></i>
+          </div>
+          <div class="task-title-section">
+            <h1 class="task-title">{{ task.title }}</h1>
+            <div class="task-meta">
+              <span class="task-id">Task #{{ task.id.substring(0, 8) }}</span>
+              <span class="task-created">Created {{ task.createdAt | timeAgo }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-action btn-edit" (click)="editTask()">
+            <i class="fas fa-edit"></i>
+            Edit
+          </button>
+          <button class="btn-action btn-delete" (click)="confirmDelete()">
+            <i class="fas fa-trash-alt"></i>
+            Delete
+          </button>
+        </div>
+      </div>
+      
+      <!-- Task Status Bar -->
+      <div class="task-status-bar">
+        <div class="status-wrapper">
+          <span class="status-label">Status:</span>
+          <div class="status-options">
+            <button 
+              *ngFor="let status of statuses" 
+              class="status-option" 
+              [class.active]="task.status === status.value"
+              [class.disabled]="statusUpdating"
+              (click)="updateStatus(status.value)"
+            >
+              {{ status.label }}
+            </button>
+          </div>
+        </div>
+        <div class="priority-badge" [style.background-color]="getPriorityColor() + '1a'" [style.color]="getPriorityColor()">
+          <i class="fas fa-flag"></i>
+          {{ task.priority | titlecase }} Priority
+        </div>
+      </div>
+      
+      <!-- Main Task Info -->
+      <div class="task-info-grid">
+        <!-- Description Section -->
+        <div class="task-description-section info-card">
+          <h3 class="section-title">Description</h3>
+          <div class="description-content">
+            <p *ngIf="task.description">{{ task.description }}</p>
+            <p *ngIf="!task.description" class="empty-state">No description provided</p>
+          </div>
+        </div>
+        
+        <!-- Details Section -->
+        <div class="task-details-section info-card">
+          <h3 class="section-title">Details</h3>
+          <div class="details-list">
+            <!-- Due Date -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <i class="fas fa-calendar-alt"></i>
+                Due Date
+              </div>
+              <div class="detail-value" [class.overdue]="isOverdue">
+                <span *ngIf="task.dueDate">
+                  {{ task.dueDate | date:'MMM d, y' }} ({{ getDueDateDisplay() }})
+                </span>
+                <span *ngIf="!task.dueDate">No due date set</span>
+              </div>
+            </div>
+            
+            <!-- Assignee -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <i class="fas fa-user"></i>
+                Assignee
+              </div>
+              <div class="detail-value">
+                <span *ngIf="assignee">{{ assignee.firstName }} {{ assignee.lastName }}</span>
+                <span *ngIf="!assignee">Unassigned</span>
+              </div>
+            </div>
+            
+            <!-- Creator -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <i class="fas fa-user-plus"></i>
+                Created by
+              </div>
+              <div class="detail-value">
+                <span *ngIf="creator">{{ creator.firstName }} {{ creator.lastName }}</span>
+                <span *ngIf="!creator">Unknown</span>
+              </div>
+            </div>
+            
+            <!-- Project -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <i class="fas fa-project-diagram"></i>
+                Project
+              </div>
+              <div class="detail-value">
+                <a *ngIf="task.projectId" [routerLink]="['/projects', task.projectId]">
+                  View Project
+                </a>
+                <span *ngIf="!task.projectId">Not assigned to a project</span>
+              </div>
+            </div>
+            
+            <!-- Estimated Hours -->
+            <div class="detail-item">
+              <div class="detail-label">
+                <i class="fas fa-clock"></i>
+                Estimated Time
+              </div>
+              <div class="detail-value">
+                <span *ngIf="task.estimatedHours">{{ task.estimatedHours }} hours</span>
+                <span *ngIf="!task.estimatedHours">Not estimated</span>
+              </div>
+            </div>
+            
+            <!-- Completed Date -->
+            <div class="detail-item" *ngIf="task.completedAt">
+              <div class="detail-label">
+                <i class="fas fa-check-circle"></i>
+                Completed
+              </div>
+              <div class="detail-value">
+                {{ task.completedAt | date:'MMM d, y' }} ({{ task.completedAt | timeAgo }})
+              </div>
+            </div>
+            
+            <!-- Tags -->
+            <div class="detail-item" *ngIf="task.tags && task.tags.length > 0">
+              <div class="detail-label">
+                <i class="fas fa-tags"></i>
+                Tags
+              </div>
+              <div class="detail-value">
+                <div class="tag-list">
+                  <span class="tag" *ngFor="let tag of task.tags">{{ tag }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Attachments Section -->
+      <div class="attachments-section info-card">
+        <div class="section-header">
+          <h3 class="section-title">Attachments</h3>
+          <app-file-dropzone 
+            [disabled]="isUploadingFile"
+            [allowMultiple]="false"
+            (filesSelected)="handleFileUpload($event)"
+          ></app-file-dropzone>
+        </div>
+        
+        <div class="attachments-list">
+          <div *ngIf="isUploadingFile" class="uploading-indicator">
+            <i class="fas fa-spinner fa-spin"></i>
+            Uploading file...
+          </div>
+          
+          <div *ngIf="attachments.length === 0 && !isUploadingFile" class="empty-state">
+            No attachments for this task
+          </div>
+          
+          <div *ngFor="let attachment of attachments" class="attachment-item">
+            <div class="attachment-icon">
+              <i *ngIf="attachment.mimeType.includes('image')" class="fas fa-file-image"></i>
+              <i *ngIf="attachment.mimeType.includes('pdf')" class="fas fa-file-pdf"></i>
+              <i *ngIf="attachment.mimeType.includes('word')" class="fas fa-file-word"></i>
+              <i *ngIf="attachment.mimeType.includes('excel') || attachment.mimeType.includes('spreadsheet')" class="fas fa-file-excel"></i>
+              <i *ngIf="!attachment.mimeType.includes('image') && 
+                       !attachment.mimeType.includes('pdf') && 
+                       !attachment.mimeType.includes('word') && 
+                       !attachment.mimeType.includes('excel') && 
+                       !attachment.mimeType.includes('spreadsheet')" class="fas fa-file"></i>
+            </div>
+            
+            <div class="attachment-details">
+              <div class="attachment-name">{{ attachment.originalName }}</div>
+              <div class="attachment-meta">
+                {{ attachment.size | fileSize }} • Uploaded {{ attachment.createdAt | timeAgo }}
+              </div>
+            </div>
+            
+            <div class="attachment-actions">
+              <button class="btn-icon" (click)="downloadAttachment(attachment)" title="Download">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="btn-icon" (click)="deleteAttachment(attachment)" title="Delete">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Comments Section -->
+      <div class="comments-section info-card">
+        <h3 class="section-title">Comments</h3>
+        
+        <div class="comment-form">
+          <div class="form-group">
+            <textarea
+              [formControl]="commentContent"
+              placeholder="Write a comment..."
+              rows="3"
+            ></textarea>
+            <button class="btn-submit" [disabled]="!commentContent.value?.trim()" (click)="addComment()">
+              Add Comment
+            </button>
+          </div>
+        </div>
+        
+            <!-- Update the comments-list in task-detail.component.html -->
+    <div class="comments-list">
+        <div *ngIf="comments.length === 0" class="empty-state">
+        No comments yet
+        </div>
+        
+        <div *ngFor="let comment of comments" class="comment-item">
+        <div class="comment-header">
+            <div class="comment-author">
+            <img 
+                [src]="comment.author?.avatarUrl || 'assets/images/default-avatar.png'" 
+                alt="User avatar" 
+                class="avatar"
+            >
+            <span class="author-name">{{ comment.author?.firstName }} {{ comment.author?.lastName }}</span>
+            </div>
+            <div class="comment-time">{{ comment.createdAt | timeAgo }}</div>
+        </div>
+        <div class="comment-content">{{ comment.content }}</div>
+        <div class="comment-actions" *ngIf="currentUser?.id === comment.authorId">
+            <button class="action-btn" (click)="editComment(comment)">Edit</button>
+            <button class="action-btn" (click)="deleteComment(comment.id)">Delete</button>
+        </div>
+        </div>
+    </div>
+      </div>
+    </div>
+    
+    <!-- Delete Confirmation Dialog -->
+    <app-confirmation-dialog
+      *ngIf="showDeleteConfirmation"
+      title="Delete Task"
+      message="Are you sure you want to delete this task? This action cannot be undone."
+      confirmText="Delete"
+      cancelText="Cancel"
+      (confirm)="deleteTask()"
+      (cancel)="cancelDelete()"
+    ></app-confirmation-dialog>
+  </div>
