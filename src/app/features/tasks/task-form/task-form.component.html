@@ -1,0 +1,141 @@
+<!-- src/app/features/tasks/task-form/task-form.component.html -->
+<div class="task-form-container">
+    <div class="header">
+      <h1 class="page-title">{{ isEditMode ? 'Edit Task' : 'Create Task' }}</h1>
+      <p class="page-subtitle">
+        {{ isEditMode ? 'Update task details' : 'Fill in the details to create a new task' }}
+      </p>
+    </div>
+    
+    <app-loading-spinner *ngIf="loading" text="Loading task data..."></app-loading-spinner>
+    
+    <form *ngIf="!loading" [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="task-form">
+      <div class="form-grid">
+        <!-- Title -->
+        <div class="form-group full-width">
+          <label for="title">Task Title <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="title" 
+            formControlName="title" 
+            placeholder="Enter task title"
+            [class.is-invalid]="formControls.title.touched && formControls.title.errors"
+          >
+          <div class="invalid-feedback" *ngIf="formControls.title.touched && formControls.title.errors">
+            <span *ngIf="formControls.title.errors.required">Title is required</span>
+            <span *ngIf="formControls.title.errors.maxlength">Title cannot exceed 100 characters</span>
+          </div>
+        </div>
+        
+        <!-- Description -->
+        <div class="form-group full-width">
+          <label for="description">Description</label>
+          <textarea 
+            id="description" 
+            formControlName="description" 
+            placeholder="Enter task description"
+            rows="4"
+            [class.is-invalid]="formControls.description.touched && formControls.description.errors"
+          ></textarea>
+          <div class="invalid-feedback" *ngIf="formControls.description.touched && formControls.description.errors">
+            <span *ngIf="formControls.description.errors.maxlength">Description cannot exceed 500 characters</span>
+          </div>
+        </div>
+        
+        <!-- Status -->
+        <div class="form-group">
+          <label for="status">Status <span class="required">*</span></label>
+          <select 
+            id="status" 
+            formControlName="status"
+            [class.is-invalid]="formControls.status.touched && formControls.status.errors"
+          >
+            <option *ngFor="let status of statuses" [value]="status.value">{{ status.label }}</option>
+          </select>
+          <div class="invalid-feedback" *ngIf="formControls.status.touched && formControls.status.errors">
+            <span *ngIf="formControls.status.errors.required">Status is required</span>
+          </div>
+        </div>
+        
+        <!-- Priority -->
+        <div class="form-group">
+          <label for="priority">Priority <span class="required">*</span></label>
+          <select 
+            id="priority" 
+            formControlName="priority"
+            [class.is-invalid]="formControls.priority.touched && formControls.priority.errors"
+          >
+            <option *ngFor="let priority of priorities" [value]="priority.value">{{ priority.label }}</option>
+          </select>
+          <div class="invalid-feedback" *ngIf="formControls.priority.touched && formControls.priority.errors">
+            <span *ngIf="formControls.priority.errors.required">Priority is required</span>
+          </div>
+        </div>
+        
+        <!-- Due Date -->
+        <div class="form-group">
+          <label for="dueDate">Due Date</label>
+          <input 
+            type="date" 
+            id="dueDate" 
+            formControlName="dueDate"
+          >
+        </div>
+        
+        <!-- Estimated Hours -->
+        <div class="form-group">
+          <label for="estimatedHours">Estimated Hours</label>
+          <input 
+            type="number" 
+            id="estimatedHours" 
+            formControlName="estimatedHours"
+            min="0"
+            step="0.5"
+            [class.is-invalid]="formControls.estimatedHours.touched && formControls.estimatedHours.errors"
+          >
+          <div class="invalid-feedback" *ngIf="formControls.estimatedHours.touched && formControls.estimatedHours.errors">
+            <span *ngIf="formControls.estimatedHours.errors.min">Hours cannot be negative</span>
+            <span *ngIf="formControls.estimatedHours.errors.max">Hours cannot exceed 1000</span>
+          </div>
+        </div>
+        
+        <!-- Project -->
+        <div class="form-group">
+          <label for="projectId">Project</label>
+          <select id="projectId" formControlName="projectId">
+            <option [value]="null">No Project</option>
+            <option *ngFor="let project of projects" [value]="project.id">{{ project.name }}</option>
+          </select>
+        </div>
+        
+        <!-- Assignee -->
+        <div class="form-group">
+          <label for="assigneeId">Assignee</label>
+          <select id="assigneeId" formControlName="assigneeId">
+            <option [value]="null">Unassigned</option>
+            <option *ngFor="let user of users" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+          </select>
+        </div>
+        
+        <!-- Tags -->
+        <div class="form-group full-width">
+          <label for="tags">Tags</label>
+          <input 
+            type="text" 
+            id="tags" 
+            formControlName="tags" 
+            placeholder="Enter tags, separated by commas"
+          >
+          <div class="form-hint">Separate multiple tags with commas (e.g., "frontend, bug, urgent")</div>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="saving">
+          <span *ngIf="saving" class="spinner-border spinner-border-sm mr-1"></span>
+          {{ isEditMode ? 'Update Task' : 'Create Task' }}
+        </button>
+      </div>
+    </form>
+  </div>

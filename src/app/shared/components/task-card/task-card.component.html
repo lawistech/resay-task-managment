@@ -1,0 +1,21 @@
+<!-- src/app/shared/components/task-card/task-card.component.html -->
+<div class="task-card" [ngClass]="{'overdue': isOverdue}">
+    <div class="task-priority" [ngClass]="priorityClass" [title]="priorityLabel"></div>
+    
+    <div class="task-content">
+      <h3 class="task-title">{{ task.title }}</h3>
+      <p *ngIf="task.description" class="task-description">{{ task.description | slice:0:100 }}{{ task.description.length > 100 ? '...' : '' }}</p>
+      
+      <div class="task-meta">
+        <div *ngIf="task.dueDate" class="due-date" [ngClass]="{'overdue': isOverdue}">
+          <i class="fas fa-calendar-alt"></i>
+          <span>{{ dueDateLabel }}</span>
+        </div>
+        
+        <div *ngIf="task.tags && task.tags.length > 0" class="tags">
+          <span *ngFor="let tag of task.tags.slice(0, 2)" class="tag">{{ tag }}</span>
+          <span *ngIf="task.tags.length > 2" class="more-tags">+{{ task.tags.length - 2 }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
